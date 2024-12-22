@@ -1,0 +1,183 @@
+local Aimbot_Library = {}
+
+-- إعدادات المكتبة
+Aimbot_Library.Settings = {
+    Aimbot_Enabled = false,
+    MaxCheckDistance = 10000,
+    DetectionPrecision = 0.1,
+    PredictionFactor = 0.1,
+    FOV = 30,
+    Smoothness = 0.2, -- سلاسة الحركة
+    Protection = true, -- حماية ضد الحظر
+}
+
+-- خدمات اللعبة
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
+
+local localPlayer = Players.LocalPlayer
+local camera = Workspace.CurrentCamera
+
+-- واجهة المستخدم
+local screenGui = Instance.new("ScreenGui")
+screenGui.ResetOnSpawn = false
+screenGui.Parent = localPlayer:WaitForChild("PlayerGui")
+
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 100, 0, 30)
+toggleButton.Position = UDim2.new(0.5, -50, 0.1, 0)
+toggleButton.BackgroundTransparency = 0.2
+toggleButton.BackgroundColor3 = Color3.fromRGB(128, 128, 128)
+toggleButton.Text = "Aimbot Disabled"
+toggleButton.Parent = screenGui
+
+local enemyStatusLabel = Instance.new("TextLabel")
+enemyStatusLabel.Size = UDim2.new(0, 200, 0, 30)
+enemyStatusLabel.Position = UDim2.new(0.5, -100, 0.2, 0)
+enemyStatusLabel.BackgroundTransparency = 1
+enemyStatusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+enemyStatusLabel.Text = "No enemy detected"
+enemyStatusLabel.Parent = screenGui
+
+-- حماية متقدمة
+local lastProtectionCheck = tick()
+local protectionInterval = math.random(5, 10)
+
+-- وظيفة تحقق الحماية المتقدمة
+local function performAdvancedProtectionCheck()
+    if tick() - lastProtectionCheck >= protectionInterval then
+        lastProtectionCheck = tick()
+        protectionInterval = math.random(5, 10) -- إعادة تعيين الفاصل الزمني العشوائي
+        
+        local function checkForSuspiciousActivity()
+            -- قم بتعديل هذه الوظيفة حسب الحاجة للتحقق من الأنشطة المشبوهة
+            return false
+        end
+        
+        if checkForSuspiciousActivity() then
+            warn("Suspicious activity detected! Stopping the script.")
+            return
+        end
+    end
+end
+
+-- وظائف المساعدة
+function Aimbot_Library.IsEnemy(player)
+    return player.Team == nil or localPlayer.Team == nil or player.Team ~= localPlayer.Team
+end
+
+function Aimbot_Library.IsAlive(player)
+    return player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0
+end
+
+-- فحص الجدران
+function Aimbot_Library.IsPartVisible(part)
+    local origin = camera.CFrame.Position
+    local direction = (part.Position - origin).Unit
+    local distance = (part.Position - origin).Magnitude
+
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {localPlayer.Character, part.Parent}
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+    raycastParams.IgnoreWater = true
+
+    local raycastResult = Workspace:Raycast(origin, direction * distance, raycastParams)
+    return raycastResult == nil -- إذا لم يتم العثور على أي شيء في المسار
+end
+
+function Aimbot_Library.IsWithinFov(targetPosition)
+    local direction = (targetPosition - camera.CFrame.Position).Unit
+    local lookVector = camera.CFrame.LookVector
+    local dotProduct = direction:Dot(lookVector)
+
+    local fovCosine = math.cos(math.rad(Aimbot_Library.Settings.FOV / 2))
+    return dotProduct >= fovCosine
+end
+
+function Aimbot_Library.GetClosestEnemy()
+    local bestHitbox = nil
+    local closestDistance = math.huge
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= localPlayer and Aimbot_Library.IsEnemy(player) and Aimbot_Library.IsAlive(player) then
+            local head = player.Character:FindFirstChild("Head")
+            if head and Aimbot_Library.IsWithinFov(head.Position) and Aimbot_Library.IsPartVisible(head) then
+                local distance = (head.Position - localPlayer.Character.HumanoidRootPart.Position).Magnitude
+                if distance < closestDistance then
+                    closestDistance = distance
+                    bestHitbox = head
+                end
+            end
+        end
+    end
+
+    return bestHitbox, closestDistance
+end
+
+function Aimbot_Library.PredictMovement(hitbox)
+    local velocity = hitbox.AssemblyLinearVelocity
+    return hitbox.Position + (velocity * Aimbot_Library.Settings.PredictionFactor)
+end
+
+-- دالة لتطبيق السلاسة في التصويب
+function Aimbot_Library.SmoothAim(currentPosition, targetPosition, smoothness)
+    local direction = (targetPosition - currentPosition).unit
+    local smoothPosition = currentPosition + direction * smoothness
+    return smoothPosition
+end
+
+-- تشغيل Aimbot
+RunService.RenderStepped:Connect(function(deltaTime)
+    performAdvancedProtectionCheck() -- تحقق الحماية المتقدمة
+
+    if Aimbot_Library.Settings.Aimbot_Enabled then
+        local targetHitbox, _ = Aimbot_Library.GetClosestEnemy()
+        if targetHitbox then
+            local targetPosition = Aimbot_Library.PredictMovement(targetHitbox)
+            enemyStatusLabel.Text = "Enemy: " .. targetHitbox.Parent.Name
+            enemyStatusLabel.TextColor3 = Color3.fromRGB(255, 0, 0)  -- العدو تم الكشف عنه
+
+            local currentPosition = camera.CFrame.Position
+            local smoothPosition = Aimbot_Library.SmoothAim(camera.CFrame.Position, targetPosition, Aimbot_Library.Settings.Smoothness)
+            camera.CFrame = CFrame.new(currentPosition, smoothPosition)
+        else
+            enemyStatusLabel.Text = "No enemy detected"
+            enemyStatusLabel.TextColor3 = Color3.fromRGB(0, 255, 0) -- لا يوجد عدو
+        end
+    end
+end)
+
+-- حماية ضد الحظر
+if Aimbot_Library.Settings.Protection then
+    task.spawn(function()
+        while true do
+            RunService.Heartbeat:Wait()
+            if Aimbot_Library.Settings.Aimbot_Enabled then
+                Aimbot_Library.Settings.Aimbot_Enabled = false
+                task.wait(0.1)
+                Aimbot_Library.Settings.Aimbot_Enabled = true
+            end
+        end
+    end)
+end
+
+game.StarterGui:SetCore("SendNotification", {
+    Title = "🔰💯Don't expose yourself";
+    Text = "Protection may affect the game";
+    Icon = "rbxassetid://115469660765124";
+    Duration = 20;
+})
+
+-- إضافة وظيفة لتبديل تفعيل الـ Aimbot
+toggleButton.MouseButton1Click:Connect(function()
+    Aimbot_Library.Settings.Aimbot_Enabled = not Aimbot_Library.Settings.Aimbot_Enabled
+    if Aimbot_Library.Settings.Aimbot_Enabled then
+        toggleButton.Text = "Aimbot Enabled"
+    else
+        toggleButton.Text = "Aimbot Disabled"
+    end
+end)
+
+return Aimbot_Library
