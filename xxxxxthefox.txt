@@ -3,12 +3,12 @@ local Aimbot_Library = {}
 -- إعدادات المكتبة
 Aimbot_Library.Settings = {
     Aimbot_Enabled = false,
-    MaxCheckDistance = 10000,
+    MaxCheckDistance = 20000,
     DetectionPrecision = 0.1,
     PredictionFactor = 0.1,
-    FOV = 30,
-    Smoothness = 0.2, -- سلاسة الحركة
-    Protection = true, -- حماية ضد الحظر
+    FOV = 60,  -- تعديل قيمة FOV هنا مباشرة
+    Smoothness = 0.2,
+    Protection = true,
 }
 
 -- خدمات اللعبة
@@ -19,49 +19,6 @@ local UserInputService = game:GetService("UserInputService")
 
 local localPlayer = Players.LocalPlayer
 local camera = Workspace.CurrentCamera
-
--- واجهة المستخدم
-local screenGui = Instance.new("ScreenGui")
-screenGui.ResetOnSpawn = false
-screenGui.Parent = localPlayer:WaitForChild("PlayerGui")
-
-local toggleButton = Instance.new("TextButton")
-toggleButton.Size = UDim2.new(0, 100, 0, 30)
-toggleButton.Position = UDim2.new(0.5, -50, 0.1, 0)
-toggleButton.BackgroundTransparency = 0.2
-toggleButton.BackgroundColor3 = Color3.fromRGB(128, 128, 128)
-toggleButton.Text = "Aimbot Disabled"
-toggleButton.Parent = screenGui
-
-local enemyStatusLabel = Instance.new("TextLabel")
-enemyStatusLabel.Size = UDim2.new(0, 200, 0, 30)
-enemyStatusLabel.Position = UDim2.new(0.5, -100, 0.2, 0)
-enemyStatusLabel.BackgroundTransparency = 1
-enemyStatusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-enemyStatusLabel.Text = "No enemy detected"
-enemyStatusLabel.Parent = screenGui
-
--- حماية متقدمة
-local lastProtectionCheck = tick()
-local protectionInterval = math.random(5, 10)
-
--- وظيفة تحقق الحماية المتقدمة
-local function performAdvancedProtectionCheck()
-    if tick() - lastProtectionCheck >= protectionInterval then
-        lastProtectionCheck = tick()
-        protectionInterval = math.random(5, 10) -- إعادة تعيين الفاصل الزمني العشوائي
-        
-        local function checkForSuspiciousActivity()
-            -- قم بتعديل هذه الوظيفة حسب الحاجة للتحقق من الأنشطة المشبوهة
-            return false
-        end
-        
-        if checkForSuspiciousActivity() then
-            warn("Suspicious activity detected! Stopping the script.")
-            return
-        end
-    end
-end
 
 -- وظائف المساعدة
 function Aimbot_Library.IsEnemy(player)
@@ -105,7 +62,7 @@ function Aimbot_Library.GetClosestEnemy()
             local head = player.Character:FindFirstChild("Head")
             if head and Aimbot_Library.IsWithinFov(head.Position) and Aimbot_Library.IsPartVisible(head) then
                 local distance = (head.Position - localPlayer.Character.HumanoidRootPart.Position).Magnitude
-                if distance < closestDistance then
+                if distance < closestDistance and distance <= Aimbot_Library.Settings.MaxCheckDistance then
                     closestDistance = distance
                     bestHitbox = head
                 end
@@ -130,54 +87,17 @@ end
 
 -- تشغيل Aimbot
 RunService.RenderStepped:Connect(function(deltaTime)
-    performAdvancedProtectionCheck() -- تحقق الحماية المتقدمة
-
     if Aimbot_Library.Settings.Aimbot_Enabled then
         local targetHitbox, _ = Aimbot_Library.GetClosestEnemy()
         if targetHitbox then
             local targetPosition = Aimbot_Library.PredictMovement(targetHitbox)
-            enemyStatusLabel.Text = "Enemy: " .. targetHitbox.Parent.Name
-            enemyStatusLabel.TextColor3 = Color3.fromRGB(255, 0, 0)  -- العدو تم الكشف عنه
-
-            local currentPosition = camera.CFrame.Position
-            local smoothPosition = Aimbot_Library.SmoothAim(camera.CFrame.Position, targetPosition, Aimbot_Library.Settings.Smoothness)
-            camera.CFrame = CFrame.new(currentPosition, smoothPosition)
-        else
-            enemyStatusLabel.Text = "No enemy detected"
-            enemyStatusLabel.TextColor3 = Color3.fromRGB(0, 255, 0) -- لا يوجد عدو
+            -- لا حاجة لواجهة المستخدم هنا لأننا نتعامل مع الإعدادات فقط
         end
     end
 end)
 
--- حماية ضد الحظر
-if Aimbot_Library.Settings.Protection then
-    task.spawn(function()
-        while true do
-            RunService.Heartbeat:Wait()
-            if Aimbot_Library.Settings.Aimbot_Enabled then
-                Aimbot_Library.Settings.Aimbot_Enabled = false
-                task.wait(0.1)
-                Aimbot_Library.Settings.Aimbot_Enabled = true
-            end
-        end
-    end)
-end
-
-game.StarterGui:SetCore("SendNotification", {
-    Title = "🔰💯Don't expose yourself";
-    Text = "Protection may affect the game";
-    Icon = "rbxassetid://115469660765124";
-    Duration = 20;
-})
-
--- إضافة وظيفة لتبديل تفعيل الـ Aimbot
-toggleButton.MouseButton1Click:Connect(function()
+-- تغيير حالة التفعيل
+local function ToggleAimbot()
     Aimbot_Library.Settings.Aimbot_Enabled = not Aimbot_Library.Settings.Aimbot_Enabled
-    if Aimbot_Library.Settings.Aimbot_Enabled then
-        toggleButton.Text = "Aimbot Enabled"
-    else
-        toggleButton.Text = "Aimbot Disabled"
-    end
-end)
-
-return Aimbot_Library
+    -- هنا سيتم تفعيل أو تعطيل الأيمبوت حسب الحالة
+end
