@@ -1,330 +1,146 @@
-local client = game.Players.LocalPlayer
-local chr = client.Character or client.CharacterAdded:Wait()
-local root = chr:WaitForChild('HumanoidRootPart')
-local camera = workspace.CurrentCamera
-local runservice = game:GetService('RunService')
+game.StarterGui:SetCore("SendNotification",  {
+ Title = "fox | @xxxxxthefox";
+ Text = "غير متحمل مسؤوليه الحظر";
+ Icon = "rbxassetid://115469660765124";
+ Duration = 20;
+})
 
-local v2 = Vector2.new
-local cf = CFrame.new
 
--- إعدادات الألوان
-local settings = {
-    box_color = Color3.fromRGB(255, 0, 255), -- لون الصندوق (بنفسجي)
-    name_color = Color3.fromRGB(0, 255, 255), -- لون الاسم (سماوي)
-    health_distance_color = Color3.fromRGB(0, 255, 0), -- لون الصحة والمسافة (أخضر فاتح)
-    line_color = Color3.fromRGB(255, 255, 255), -- لون خط التتبع (أبيض)
-    back_line_color = Color3.fromRGB(128, 128, 128), -- لون الخط الخلفي (رمادي)
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 350, 0, 450)  -- تصغير الحجم
+Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+Frame.AnchorPoint = Vector2.new(0.5, 0.5)
+Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Frame.BorderSizePixel = 0
+Frame.Active = true
+Frame.Draggable = true
+Frame.Parent = ScreenGui
+
+local FrameCorner = Instance.new("UICorner")
+FrameCorner.CornerRadius = UDim.new(0, 12)
+FrameCorner.Parent = Frame
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 40)  -- تصغير الحجم
+Title.Position = UDim2.new(0, 0, 0, 0)
+Title.Text = "fox | @xxxxxthefox"
+Title.TextSize = 18  -- تصغير حجم النص
+Title.Font = Enum.Font.SourceSansBold
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Title.BorderSizePixel = 0
+Title.Parent = Frame
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 12)
+TitleCorner.Parent = Title
+
+local Close = Instance.new("TextButton")
+Close.Size = UDim2.new(0, 30, 0, 30)  -- تصغير حجم الزر
+Close.Position = UDim2.new(1, -35, 0, 5)
+Close.BackgroundTransparency = 1
+Close.Text = "×"
+Close.TextScaled = true
+Close.Font = Enum.Font.SourceSansBold
+Close.TextColor3 = Color3.fromRGB(200, 80, 80)
+Close.Parent = Frame
+
+Close.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+local UIList = Instance.new("UIListLayout")
+UIList.FillDirection = Enum.FillDirection.Vertical
+UIList.SortOrder = Enum.SortOrder.LayoutOrder
+UIList.Padding = UDim.new(0, 5)  -- تقليل المسافة بين الأزرار
+UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIList.Parent = Frame
+
+-- خيارات مع الترجمة
+local Options = {
+    {Text = "أيمبوت / Aimbot", Description = "أيمبوت مع فحوصات وحماية متقدمة / Aimbot with advanced checks and protection", ScriptUrl = "https://raw.githubusercontent.com/xxxxxthefox/1fox1/refs/heads/main/F"},
+    {Text = "إطلاق تلقائي / Auto Fire", Description = "إطلاق تلقائي مع أيمبوت يعمل بنسبة 20% - 100% من الألعاب / Auto Fire with Aimbot working 20% - 100% of the games", ScriptUrl = "https://raw.githubusercontent.com/xxxxxthefox/1fox1/refs/heads/main/%E0%BC%BD%F3%A0%84%83%E1%85%A0%E1%85%A0%F3%A0%84%83"},
+    {Text = "غير متوفر / Unavailable", Description = "هذا الخيار غير متاح حالياً / This option is currently unavailable", ScriptUrl = ""},
 }
 
--- وظيفة لإنشاء العناصر بالرسوم
-local function Draw(obj, prop)
-    local drawing = Drawing.new(obj)
-    for key, value in pairs(prop) do
-        drawing[key] = value
-    end
-    return drawing
-end
+local function createOptionButton(option)
+    local ButtonFrame = Instance.new("Frame")
+    ButtonFrame.Size = UDim2.new(0.9, 0, 0, 80)  -- تصغير الحجم بحيث لا يغطي الوصف
+    ButtonFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    ButtonFrame.BorderSizePixel = 0
+    ButtonFrame.Parent = Frame
 
--- الوظيفة الأساسية لرسم ESP
-local function createESP(player)
-    -- نص لاسم اللاعب
-    local text = Draw('Text', {
-        Size = 16,
-        Text = player.Name,
-        Color = settings.name_color,
-        Center = true,
-        Outline = true,
-        OutlineColor = Color3.new(0, 0, 0)
-    })
+    local ButtonFrameCorner = Instance.new("UICorner")
+    ButtonFrameCorner.CornerRadius = UDim.new(0, 8)
+    ButtonFrameCorner.Parent = ButtonFrame
 
-    -- نص للصحة والمسافة
-    local health_distance = Draw('Text', {
-        Size = 14,
-        Color = settings.health_distance_color,
-        Center = true,
-        Outline = true,
-        OutlineColor = Color3.new(0, 0, 0)
-    })
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(0.9, 0, 0, 35)  -- تصغير حجم الزر
+    Button.Position = UDim2.new(0.05, 0, 0.2, 0)
+    Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Button.Text = option.Text
+    Button.Font = Enum.Font.SourceSansBold
+    Button.TextSize = 16  -- تصغير حجم النص
+    Button.TextColor3 = Color3.fromRGB(200, 200, 200)
+    Button.Parent = ButtonFrame
 
-    -- خطوط التتبع
-    local line = Draw('Line', {
-        Thickness = 2,
-        Color = settings.line_color,
-        ZIndex = 2
-    })
+    local ButtonCorner = Instance.new("UICorner")
+    ButtonCorner.CornerRadius = UDim.new(0, 12)
+    ButtonCorner.Parent = Button
 
-    local back_line = Draw('Line', {
-        Thickness = 3,
-        Color = settings.back_line_color,
-        ZIndex = 1
-    })
+    -- تعديل للوصف ليظهر بشكل جيد
+    local Description = Instance.new("TextLabel")
+    Description.Size = UDim2.new(0.9, 0, 0, 30)  -- تحديد الحجم بشكل مناسب
+    Description.Position = UDim2.new(0.05, 0, 0.65, 0)  -- ضبط الوضع بحيث يظهر تحت الزر
+    Description.BackgroundTransparency = 1
+    Description.Text = option.Description
+    Description.Font = Enum.Font.SourceSans
+    Description.TextSize = 12  -- تصغير حجم النص
+    Description.TextColor3 = Color3.fromRGB(180, 180, 180)
+    Description.TextWrapped = true
+    Description.TextScaled = true
+    Description.Parent = ButtonFrame
 
-    -- خطوط الصندوق
-    local box = {
-        top = Draw('Line', { Thickness = 2, Color = settings.box_color, ZIndex = 2 }),
-        bottom = Draw('Line', { Thickness = 2, Color = settings.box_color, ZIndex = 2 }),
-        left = Draw('Line', { Thickness = 2, Color = settings.box_color, ZIndex = 2 }),
-        right = Draw('Line', { Thickness = 2, Color = settings.box_color, ZIndex = 2 }),
-    }
-
-    -- تحديث الرسوميات عند كل إطار
-    runservice.RenderStepped:Connect(function()
-        if player and player.Character and player.Character:FindFirstChild('HumanoidRootPart') and
-           player.Character:FindFirstChild('Humanoid') and player.Character.Humanoid.Health > 0 then
-
-            local rootPart = player.Character.HumanoidRootPart
-            local humanoid = player.Character.Humanoid
-            local top_pos, on_screen = camera:WorldToViewportPoint((rootPart.CFrame * cf(0, 3, 0)).p)
-            local bottom_pos = camera:WorldToViewportPoint((rootPart.CFrame * cf(0, -3, 0)).p)
-            
-            -- حساب المسافة بين اللاعب والشخصية المحلية
-            local distance = (root.Position - rootPart.Position).Magnitude
-            
-            -- إعداد النصوص
-            text.Position = v2(top_pos.x, top_pos.y - text.TextBounds.Y)
-            text.Visible = on_screen
-            
-            health_distance.Text = string.format("الصحة: %.0f | المسافة: %.0f", humanoid.Health, distance)
-            health_distance.Position = v2(top_pos.x, top_pos.y + text.TextBounds.Y)
-            health_distance.Visible = on_screen
-            
-            -- إعداد خط التتبع
-            line.From = v2(camera.ViewportSize.x / 2, camera.ViewportSize.y)
-            line.To = v2(bottom_pos.x, bottom_pos.y)
-            line.Visible = on_screen
-            
-            back_line.From = v2(camera.ViewportSize.x / 2, camera.ViewportSize.y)
-            back_line.To = v2(bottom_pos.x, bottom_pos.y)
-            back_line.Visible = on_screen
-            
-            -- إعداد خطوط الصندوق
-            local tl = camera:WorldToViewportPoint((rootPart.CFrame * cf(-2, 3, 0)).p)
-            local tr = camera:WorldToViewportPoint((rootPart.CFrame * cf(2, 3, 0)).p)
-            local bl = camera:WorldToViewportPoint((rootPart.CFrame * cf(-2, -3, 0)).p)
-            local br = camera:WorldToViewportPoint((rootPart.CFrame * cf(2, -3, 0)).p)
-
-            box.top.From = v2(tl.x, tl.y)
-            box.top.To = v2(tr.x, tr.y)
-            box.top.Visible = on_screen
-
-            box.bottom.From = v2(bl.x, bl.y)
-            box.bottom.To = v2(br.x, br.y)
-            box.bottom.Visible = on_screen
-
-            box.left.From = v2(tl.x, tl.y)
-            box.left.To = v2(bl.x, bl.y)
-            box.left.Visible = on_screen
-
-            box.right.From = v2(tr.x, tr.y)
-            box.right.To = v2(br.x, br.y)
-            box.right.Visible = on_screen
+    Button.MouseButton1Click:Connect(function()
+        if option.ScriptUrl == "" then
+            warn("هذا الخيار غير متوفر حاليًا.")
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "تنبيه / Alert",
+                Text = "هذا الخيار غير متاح حاليًا. / This option is currently unavailable.",
+                Duration = 5
+            })
         else
-            -- إخفاء العناصر إذا كان اللاعب غير مرئي أو ميت
-            text.Visible = false
-            health_distance.Visible = false
-            line.Visible = false
-            back_line.Visible = false
-            for _, part in pairs(box) do
-                part.Visible = false
+            local success, err = pcall(function()
+                loadstring(game:HttpGet(option.ScriptUrl))()
+            end)
+            if not success then
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "خطأ / Error",
+                    Text = "فشل تحميل السكربت: تحقق من الرابط. / Failed to load script: Check the link.",
+                    Duration = 5
+                })
             end
         end
     end)
 end
 
--- تفعيل ESP لجميع اللاعبين في البداية
-for _, player in pairs(game.Players:GetPlayers()) do
-    if player ~= client then
-        createESP(player)
-    end
+-- إنشاء الأزرار
+for _, option in ipairs(Options) do
+    createOptionButton(option)
 end
 
--- إضافة ESP لأي لاعب جديد ينضم للعبة
-game.Players.PlayerAdded:Connect(function(player)
-    createESP(player)
-end)
-
-local enemyDetectedColor = Color3.fromRGB(255, 0, 0)
-local noneColor = Color3.fromRGB(0, 255, 0)
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local UserInputService = game:GetService("UserInputService")
-
-local localPlayer = Players.LocalPlayer
-local camera = Workspace.CurrentCamera
-
-local aimbotEnabled = false
-local maxCheckDistance = 9999999999999999999
-local detectionPrecision = 999999999999999999  -- زيادة دقة الكشف
-local predictionFactor = 0.1 -- تحسين توقع الحركة
-
-local screenGui = Instance.new("ScreenGui")
-screenGui.ResetOnSpawn = false
-screenGui.Parent = localPlayer:WaitForChild("PlayerGui")
-
-local toggleButton = Instance.new("TextButton")
-toggleButton.Size = UDim2.new(0, 100, 0, 30)
-toggleButton.Position = UDim2.new(0.5, -50, 0.1, 0)
-toggleButton.BackgroundTransparency = 0.2
-toggleButton.BackgroundColor3 = Color3.fromRGB(128, 128, 128)
-toggleButton.Text = "الايمبوت معطل"  -- حالة الايمبوت
-toggleButton.Parent = screenGui
-
-local enemyStatusLabel = Instance.new("TextLabel")
-enemyStatusLabel.Size = UDim2.new(0, 200, 0, 30)
-enemyStatusLabel.Position = UDim2.new(0.5, -100, 0.2, 0)
-enemyStatusLabel.BackgroundTransparency = 1
-enemyStatusLabel.TextColor3 = noneColor
-enemyStatusLabel.Text = "لا يوجد عدو مكتشف"  -- رسالة الحالة
-enemyStatusLabel.Parent = screenGui
-
--- متغيرات الحماية
-local lastProtectionCheck = tick()
-local protectionInterval = math.random(5, 10) -- فترة عشوائية بين كل فحص حماية
-
--- وظيفة لإجراء فحص حماية متقدم
-local function performAdvancedProtectionCheck()
-    if tick() - lastProtectionCheck >= protectionInterval then
-        lastProtectionCheck = tick()
-        protectionInterval = math.random(5, 10) -- إعادة تعيين الفترة العشوائية
-        
-        -- دالة مخفية للتحقق من الأنشطة المشبوهة
-        local function checkForSuspiciousActivity()
-            -- تحقق من أي أنشطة مشبوهة، مثل استدعاءات الوظائف غير المصرح بها
-            return false -- يمكن تعديل هذا حسب الحاجة
-        end
-        if checkForSuspiciousActivity() then
-            warn("تم اكتشاف نشاط مشبوه! إيقاف النص.")
-            return
-        end
-    end
-end
-
--- وظيفة للتحقق إذا كان اللاعب عدواً
-local function isEnemy(player)
-    return player.Team == nil or localPlayer.Team == nil or player.Team ~= localPlayer.Team
-end
-
--- وظيفة للتحقق إذا كان اللاعب على قيد الحياة
-local function isAlive(player)
-    return player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0
-end
-
--- وظيفة للتحقق من رؤية الجزء
-local function isPartVisible(part)
-    local origin = camera.CFrame.Position
-    local direction = (part.Position - origin).Unit
-    local distance = (part.Position - origin).Magnitude
-
-    local raycastParams = RaycastParams.new()
-    raycastParams.FilterDescendantsInstances = {localPlayer.Character, part.Parent}
-    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-    raycastParams.IgnoreWater = true
-
-    local raycastResult = Workspace:Raycast(origin, direction * distance, raycastParams)
-    return not raycastResult
-end
-
--- وظيفة للتحقق من مجال الرؤية (FOV)
-local function isWithinFov(targetPosition)
-    local direction = (targetPosition - camera.CFrame.Position).Unit
-    local lookVector = camera.CFrame.LookVector
-    local dotProduct = direction:Dot(lookVector)
-
-    local fovCosine = math.cos(math.rad(45 / 2)) -- توسيع مجال الرؤية إلى 45 درجة
-    return dotProduct >= fovCosine
-end
-
--- وظيفة للعثور على أقرب عدو مرئي
-local function getClosestVisibleEnemy()
-    local bestHitbox = nil
-    local closestDistance = math.huge
-
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= localPlayer and isEnemy(player) and isAlive(player) then
-            local head = player.Character:FindFirstChild("Head")
-            if head and isPartVisible(head) and isWithinFov(head.Position) then
-                local distance = (head.Position - localPlayer.Character.HumanoidRootPart.Position).Magnitude
-                
-                if distance < closestDistance then
-                    closestDistance = distance
-                    bestHitbox = head
-                end
-            end
-        end
-    end
-
-    return bestHitbox, closestDistance
-end
-
--- وظيفة لتوقع حركة العدو
-local function predictMovement(hitbox)
-    local velocity = hitbox.Velocity
-    local predictedPosition = hitbox.Position + (velocity * predictionFactor)
-    return predictedPosition
-end
-
--- تبديل الايمبوت تشغيل أو إيقاف
-toggleButton.MouseButton1Click:Connect(function()
-    aimbotEnabled = not aimbotEnabled
-    toggleButton.Text = aimbotEnabled and "الايمبوت مفعل" or "الايمبوت معطل"  -- تحديث نص الزر
-    if not aimbotEnabled then
-        enemyStatusLabel.Text = "لا يوجد عدو مكتشف"
-        enemyStatusLabel.TextColor3 = noneColor
-    end
-end)
-
--- الحلقة الرئيسية لتحديث التصويب
-RunService.RenderStepped:Connect(function(deltaTime)
-    performAdvancedProtectionCheck() -- فحص الحماية
-
-    if aimbotEnabled then
-        local targetHitbox, distance = getClosestVisibleEnemy()
-
-        if targetHitbox then
-            local targetPosition = predictMovement(targetHitbox)
-            enemyStatusLabel.Text = "عدو: " .. targetHitbox.Parent.Name
-            enemyStatusLabel.TextColor3 = enemyDetectedColor
-
-            local currentPosition = camera.CFrame.Position
-            local smoothFactor = math.clamp(1 / distance, 0.2, 0.7) -- تحسين استجابة التصويب التلقائي
-            camera.CFrame = CFrame.new(currentPosition, targetPosition):Lerp(CFrame.new(currentPosition, targetPosition), smoothFactor)
-        else
-            enemyStatusLabel.Text = "لا يوجد عدو مكتشف"
-            enemyStatusLabel.TextColor3 = noneColor
-        end
-    end
-end)
-
-local fov = 45
-local maxTransparency = 0.1 -- الشفافية القصوى داخل الدائرة (0.1 = 10% من الشفافية)
-local RunService = game:GetService("RunService")
-local Cam = game.Workspace.CurrentCamera
-
--- تعريف الدائرة التي تمثل الـ FOV
-local FOVring = Drawing.new("Circle")
-FOVring.Thickness = 2
-FOVring.Color = Color3.fromRGB(255, 0, 0) -- اللون الأحمر
-FOVring.Filled = false
-FOVring.Radius = fov
-FOVring.Position = Cam.ViewportSize / 2
-FOVring.Visible = true -- جعلها مرئية دائمًا
-
--- تحديث رسم الـ FOV
-local function updateFOVDrawings()
-    local camViewportSize = Cam.ViewportSize
-    FOVring.Position = camViewportSize / 2
-end
-
--- تحديث كل إطار
-RunService.RenderStepped:Connect(function()
-    updateFOVDrawings()
-end)
-
-game.StarterGui:SetCore("SendNotification",  {
- Title = "vip";
- Text = "xxxxxthefox";
- Icon = "rbxassetid://115469660765124";
- Duration = 20;
-})
+-- إضافة حقوق تحت الواجهة
+local Credits = Instance.new("TextLabel")
+Credits.Size = UDim2.new(1, 0, 0, 30)
+Credits.Position = UDim2.new(0, 0, 1, -35)  -- وضع الحقوق أسفل الواجهة
+Credits.Text = "حقوق: fox | @xxxxxthefox / Rights: fox | @xxxxxthefox"
+Credits.TextSize = 12
+Credits.Font = Enum.Font.SourceSans
+Credits.TextColor3 = Color3.fromRGB(180, 180, 180)
+Credits.BackgroundTransparency = 1
+Credits.TextAlign = Enum.TextAlign.Center
+Credits.Parent = Frame
