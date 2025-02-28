@@ -63,7 +63,7 @@ UIList.Parent = Frame
 -- خيارات مع الترجمة
 local Options = {
     {Text = "أيمبوت / Aimbot", Description = "أيمبوت مع فحوصات وحماية متقدمة / Aimbot with advanced checks and protection", ScriptUrl = "https://raw.githubusercontent.com/xxxxxthefox/1fox1/refs/heads/main/F"},
-    {Text = "إطلاق تلقائي / Auto Fire", Description = "إطلاق تلقائي مع أيمبوت يعمل بنسبة 20% - 100% من الألعاب / Auto Fire with Aimbot working 20% - 100% of the games", ScriptUrl = "https://raw.githubusercontent.com/xxxxxthefox/1fox1/refs/heads/main/%E0%BC%BD%F3%A0%84%83%E1%85%A0%E1%85%A0%F3%A0%84%83"},
+    {Text = "إفطار صائم 💀/ Auto Fire with Aimbot working 20% - 100% of the games", ScriptUrl = "https://raw.githubusercontent.com/xxxxxthefox/1fox1/refs/heads/main/%E0%BC%BD%F3%A0%84%83%E1%85%A0%E1%85%A0%F3%A0%84%83"},
     {Text = "غير متوفر / Unavailable", Description = "هذا الخيار غير متاح حالياً / This option is currently unavailable", ScriptUrl = ""},
 }
 
