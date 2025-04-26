@@ -1,0 +1,186 @@
+-- مكتبة إشعارات متجاوبة ومحسنة لجميع الأجهزة
+-- Developed by ChatGPT | مستوحى من blud_wtf (https://scriptblox.com/u/blud_wtf)
+
+local library = {}
+
+-- الخدمات
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+
+-- إعدادات ثابتة
+local CONFIG = {
+	WidthRatio = 0.3,
+	MaxWidth = 400,
+	MinWidth = 250,
+	Padding = 10,
+	InternalPadding = 10,
+	IconSize = 40,
+	DisplayTime = 5,
+	BackgroundColor = Color3.fromRGB(40, 40, 40),
+	BackgroundTransparency = 0.05,
+	StrokeColor = Color3.fromRGB(90, 90, 90),
+	StrokeThickness = 1,
+	TextColor = Color3.fromRGB(255, 255, 255),
+	TitleFont = Enum.Font.GothamBold,
+	TitleSize = 18,
+	ContentFont = Enum.Font.Gotham,
+	ContentSize = 15,
+	EntryEasingStyle = Enum.EasingStyle.Quint,
+	EntryEasingDirection = Enum.EasingDirection.Out,
+	EntryTime = 0.35,
+	ExitEasingStyle = Enum.EasingStyle.Sine,
+	ExitEasingDirection = Enum.EasingDirection.In,
+	ExitTime = 0.3,
+	Icons = {
+		Info = "rbxassetid://112082878863231",
+		Warn = "rbxassetid://117107314745025",
+		Error = "rbxassetid://77067602950967",
+	}
+}
+
+-- متغيرات
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local screenGui
+local notifications = {}
+local initialized = false
+
+-- تهيئة الشاشة
+local function initializeUI()
+	if initialized then return end
+	screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "NotificationUI"
+	screenGui.Parent = playerGui
+	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	screenGui.ResetOnSpawn = false
+	screenGui.DisplayOrder = 1000
+	initialized = true
+end
+
+-- حساب العرض المناسب حسب حجم الشاشة
+local function getNotificationWidth()
+	local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
+	return math.clamp(viewport.X * CONFIG.WidthRatio, CONFIG.MinWidth, CONFIG.MaxWidth)
+end
+
+-- تحديث أماكن الإشعارات
+local function updatePositions()
+	local yOffset = -CONFIG.Padding
+	for _, notif in ipairs(notifications) do
+		if notif and notif.Parent then
+			local targetPos = UDim2.new(1, -CONFIG.Padding, 1, yOffset)
+			TweenService:Create(notif, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+				Position = targetPos
+			}):Play()
+			yOffset -= (notif.AbsoluteSize.Y + CONFIG.Padding)
+		end
+	end
+end
+
+-- إنشاء الإشعار
+function library.Notify(contentText, titleText, notifType)
+	initializeUI()
+
+	-- التحقق من القيم
+	contentText = contentText or "No content provided."
+	titleText = titleText or "Notification"
+	notifType = notifType or "Info"
+
+	local width = getNotificationWidth()
+
+	-- الإطار الرئيسي
+	local frame = Instance.new("Frame")
+	frame.Name = "Notification"
+	frame.AnchorPoint = Vector2.new(1, 1)
+	frame.Position = UDim2.new(1, width + 50, 1, 0)
+	frame.Size = UDim2.new(0, width, 0, 80)
+	frame.BackgroundColor3 = CONFIG.BackgroundColor
+	frame.BackgroundTransparency = CONFIG.BackgroundTransparency
+	frame.BorderSizePixel = 0
+	frame.AutomaticSize = Enum.AutomaticSize.Y
+	frame.Parent = screenGui
+
+	-- تنسيقات
+	Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+	Instance.new("UIStroke", frame).Color = CONFIG.StrokeColor
+	Instance.new("UIPadding", frame).PaddingTop = UDim.new(0, CONFIG.InternalPadding)
+	Instance.new("UIPadding", frame).PaddingBottom = UDim.new(0, CONFIG.InternalPadding)
+	Instance.new("UIPadding", frame).PaddingLeft = UDim.new(0, CONFIG.InternalPadding)
+	Instance.new("UIPadding", frame).PaddingRight = UDim.new(0, CONFIG.InternalPadding)
+
+	-- الأيقونة
+	local icon = Instance.new("ImageLabel", frame)
+	icon.Name = "Icon"
+	icon.Size = UDim2.new(0, CONFIG.IconSize, 0, CONFIG.IconSize)
+	icon.Position = UDim2.new(0, 0, 0.5, 0)
+	icon.AnchorPoint = Vector2.new(0, 0.5)
+	icon.BackgroundTransparency = 1
+	icon.Image = CONFIG.Icons[notifType] or CONFIG.Icons.Info
+	Instance.new("UIAspectRatioConstraint", icon).AspectRatio = 1
+
+	-- محتوى النصوص
+	local textFrame = Instance.new("Frame", frame)
+	textFrame.BackgroundTransparency = 1
+	textFrame.Size = UDim2.new(1, -(CONFIG.IconSize + CONFIG.InternalPadding + 5), 1, 0)
+	textFrame.Position = UDim2.new(0, CONFIG.IconSize + 5, 0, 0)
+	textFrame.AutomaticSize = Enum.AutomaticSize.Y
+	local layout = Instance.new("UIListLayout", textFrame)
+	layout.FillDirection = Enum.FillDirection.Vertical
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Padding = UDim.new(0, 2)
+
+	local title = Instance.new("TextLabel", textFrame)
+	title.Text = titleText
+	title.Font = CONFIG.TitleFont
+	title.TextSize = CONFIG.TitleSize
+	title.TextColor3 = CONFIG.TextColor
+	title.BackgroundTransparency = 1
+	title.Size = UDim2.new(1, 0, 0, CONFIG.TitleSize)
+	title.AutomaticSize = Enum.AutomaticSize.Y
+	title.TextWrapped = true
+	title.TextXAlignment = Enum.TextXAlignment.Left
+
+	local content = Instance.new("TextLabel", textFrame)
+	content.Text = contentText
+	content.Font = CONFIG.ContentFont
+	content.TextSize = CONFIG.ContentSize
+	content.TextColor3 = CONFIG.TextColor
+	content.BackgroundTransparency = 1
+	content.Size = UDim2.new(1, 0, 0, CONFIG.ContentSize)
+	content.AutomaticSize = Enum.AutomaticSize.Y
+	content.TextWrapped = true
+	content.TextXAlignment = Enum.TextXAlignment.Left
+
+	-- إضافة الإشعار إلى القائمة
+	table.insert(notifications, 1, frame)
+	updatePositions()
+
+	-- حركة الدخول
+	TweenService:Create(frame, TweenInfo.new(CONFIG.EntryTime, CONFIG.EntryEasingStyle, CONFIG.EntryEasingDirection), {
+		Position = UDim2.new(1, -CONFIG.Padding, 1, -CONFIG.Padding)
+	}):Play()
+
+	-- إنهاء الإشعار بعد مدة
+	task.delay(CONFIG.DisplayTime, function()
+		if frame and frame.Parent then
+			local exitTween = TweenService:Create(frame, TweenInfo.new(CONFIG.ExitTime, CONFIG.ExitEasingStyle, CONFIG.ExitEasingDirection), {
+				Position = UDim2.new(1, width + 50, 1, frame.Position.Y.Offset)
+			})
+			exitTween:Play()
+			exitTween.Completed:Wait()
+
+			frame:Destroy()
+
+			for i, notif in ipairs(notifications) do
+				if notif == frame then
+					table.remove(notifications, i)
+					break
+				end
+			end
+
+			updatePositions()
+		end
+	end)
+end
+
+return library
