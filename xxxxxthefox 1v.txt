@@ -1,146 +1,84 @@
-game.StarterGui:SetCore("SendNotification",  {
- Title = "fox | @xxxxxthefox";
- Text = "لا تنس تفطر غيرك";
- Icon = "rbxassetid://115469660765124";
- Duration = 20;
-})
+-- Services
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
+-- URLs
+local ArabicURL = "https://raw.githubusercontent.com/xxxxxthefox/hhgg/refs/heads/main/m"
+local EnglishURL = "https://raw.githubusercontent.com/xxxxxthefox/hhgg/refs/heads/main/F"
 
+-- GUI Setup
+local gui = Instance.new("ScreenGui")
+gui.Name = "LanguageGUI"
+gui.Parent = playerGui
+gui.ResetOnSpawn = false
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 400, 0, 260)
+main.Position = UDim2.new(0.5, 0, 0.5, 0)
+main.AnchorPoint = Vector2.new(0.5, 0.5)
+main.BackgroundColor3 = Color3.fromRGB(40, 120, 40)
+main.BorderSizePixel = 0
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 12)
 
-local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 350, 0, 450)  -- تصغير الحجم
-Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-Frame.AnchorPoint = Vector2.new(0.5, 0.5)
-Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Frame.BorderSizePixel = 0
-Frame.Active = true
-Frame.Draggable = true
-Frame.Parent = ScreenGui
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, -20, 0, 50)
+title.Position = UDim2.new(0, 10, 0, 10)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextColor3 = Color3.new(1, 1, 1)
+title.TextScaled = true
+title.Text = "🌍 اختر اللغة / Choose Language"
 
-local FrameCorner = Instance.new("UICorner")
-FrameCorner.CornerRadius = UDim.new(0, 12)
-FrameCorner.Parent = Frame
+local container = Instance.new("Frame", main)
+container.Size = UDim2.new(1, -40, 0, 130)
+container.Position = UDim2.new(0, 20, 0, 70)
+container.BackgroundTransparency = 1
 
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 40)  -- تصغير الحجم
-Title.Position = UDim2.new(0, 0, 0, 0)
-Title.Text = "fox | @xxxxxthefox"
-Title.TextSize = 18  -- تصغير حجم النص
-Title.Font = Enum.Font.SourceSansBold
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Title.BorderSizePixel = 0
-Title.Parent = Frame
+local layout = Instance.new("UIListLayout", container)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Padding = UDim.new(0, 12)
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-local TitleCorner = Instance.new("UICorner")
-TitleCorner.CornerRadius = UDim.new(0, 12)
-TitleCorner.Parent = Title
+-- زر الخروج
+local exitButton = Instance.new("TextButton", main)
+exitButton.Size = UDim2.new(0, 35, 0, 35)
+exitButton.Position = UDim2.new(1, -40, 0, 5)
+exitButton.Text = "X"
+exitButton.Font = Enum.Font.GothamBold
+exitButton.TextScaled = true
+exitButton.TextColor3 = Color3.new(1, 1, 1)
+exitButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+Instance.new("UICorner", exitButton).CornerRadius = UDim.new(1, 0)
 
-local Close = Instance.new("TextButton")
-Close.Size = UDim2.new(0, 30, 0, 30)  -- تصغير حجم الزر
-Close.Position = UDim2.new(1, -35, 0, 5)
-Close.BackgroundTransparency = 1
-Close.Text = "×"
-Close.TextScaled = true
-Close.Font = Enum.Font.SourceSansBold
-Close.TextColor3 = Color3.fromRGB(200, 80, 80)
-Close.Parent = Frame
-
-Close.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
+exitButton.MouseButton1Click:Connect(function()
+	gui:Destroy()
 end)
 
-local UIList = Instance.new("UIListLayout")
-UIList.FillDirection = Enum.FillDirection.Vertical
-UIList.SortOrder = Enum.SortOrder.LayoutOrder
-UIList.Padding = UDim.new(0, 5)  -- تقليل المسافة بين الأزرار
-UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-UIList.Parent = Frame
+-- Function to create button
+local function AddButton(text, url)
+	local btn = Instance.new("TextButton", container)
+	btn.Size = UDim2.new(1, 0, 0, 50)
+	btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+	btn.Text = text
+	btn.Font = Enum.Font.Gotham
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.TextScaled = true
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
 
--- خيارات مع الترجمة
-local Options = {
-    {Text = "أيمبوت / Aimbot", Description = "أيمبوت مع فحوصات وحماية متقدمة / Aimbot with advanced checks and protection", ScriptUrl = "https://raw.githubusercontent.com/xxxxxthefox/1fox1/refs/heads/main/F"},
-    {Text = "إطلاق تلقائي / Auto Fire", Description = "إطلاق تلقائي مع أيمبوت يعمل بنسبة 20% - 100% من الألعاب/ Auto Fire with Aimbot working 20% - 100% of the games", ScriptUrl = "https://raw.githubusercontent.com/xxxxxthefox/1fox1/refs/heads/main/%E0%BC%BD%F3%A0%84%83%E1%85%A0%E1%85%A0%F3%A0%84%83"},
-    {Text = "غير متوفر / Unavailable", Description = "هذا الخيار غير متاح حالياً / This option is currently unavailable", ScriptUrl = ""},
-}
-
-local function createOptionButton(option)
-    local ButtonFrame = Instance.new("Frame")
-    ButtonFrame.Size = UDim2.new(0.9, 0, 0, 80)  -- تصغير الحجم بحيث لا يغطي الوصف
-    ButtonFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    ButtonFrame.BorderSizePixel = 0
-    ButtonFrame.Parent = Frame
-
-    local ButtonFrameCorner = Instance.new("UICorner")
-    ButtonFrameCorner.CornerRadius = UDim.new(0, 8)
-    ButtonFrameCorner.Parent = ButtonFrame
-
-    local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(0.9, 0, 0, 35)  -- تصغير حجم الزر
-    Button.Position = UDim2.new(0.05, 0, 0.2, 0)
-    Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    Button.Text = option.Text
-    Button.Font = Enum.Font.SourceSansBold
-    Button.TextSize = 16  -- تصغير حجم النص
-    Button.TextColor3 = Color3.fromRGB(200, 200, 200)
-    Button.Parent = ButtonFrame
-
-    local ButtonCorner = Instance.new("UICorner")
-    ButtonCorner.CornerRadius = UDim.new(0, 12)
-    ButtonCorner.Parent = Button
-
-    -- تعديل للوصف ليظهر بشكل جيد
-    local Description = Instance.new("TextLabel")
-    Description.Size = UDim2.new(0.9, 0, 0, 30)  -- تحديد الحجم بشكل مناسب
-    Description.Position = UDim2.new(0.05, 0, 0.65, 0)  -- ضبط الوضع بحيث يظهر تحت الزر
-    Description.BackgroundTransparency = 1
-    Description.Text = option.Description
-    Description.Font = Enum.Font.SourceSans
-    Description.TextSize = 12  -- تصغير حجم النص
-    Description.TextColor3 = Color3.fromRGB(180, 180, 180)
-    Description.TextWrapped = true
-    Description.TextScaled = true
-    Description.Parent = ButtonFrame
-
-    Button.MouseButton1Click:Connect(function()
-        if option.ScriptUrl == "" then
-            warn("هذا الخيار غير متوفر حاليًا.")
-            game:GetService("StarterGui"):SetCore("SendNotification", {
-                Title = "تنبيه / Alert",
-                Text = "هذا الخيار غير متاح حاليًا. / This option is currently unavailable.",
-                Duration = 5
-            })
-        else
-            local success, err = pcall(function()
-                loadstring(game:HttpGet(option.ScriptUrl))()
-            end)
-            if not success then
-                game:GetService("StarterGui"):SetCore("SendNotification", {
-                    Title = "خطأ / Error",
-                    Text = "فشل تحميل السكربت: تحقق من الرابط. / Failed to load script: Check the link.",
-                    Duration = 5
-                })
-            end
-        end
-    end)
+	btn.MouseButton1Click:Connect(function()
+		gui:Destroy()
+		local success, result = pcall(function()
+			return game:HttpGet(url)
+		end)
+		if success then
+			loadstring(result)()
+		else
+			warn("فشل تحميل السكربت: " .. tostring(result))
+		end
+	end)
 end
 
 -- إنشاء الأزرار
-for _, option in ipairs(Options) do
-    createOptionButton(option)
-end
-
--- إضافة حقوق تحت الواجهة
-local Credits = Instance.new("TextLabel")
-Credits.Size = UDim2.new(1, 0, 0, 30)
-Credits.Position = UDim2.new(0, 0, 1, -35)  -- وضع الحقوق أسفل الواجهة
-Credits.Text = "حقوق: fox | @xxxxxthefox / Rights: fox | @xxxxxthefox"
-Credits.TextSize = 12
-Credits.Font = Enum.Font.SourceSans
-Credits.TextColor3 = Color3.fromRGB(180, 180, 180)
-Credits.BackgroundTransparency = 1
-Credits.TextAlign = Enum.TextAlign.Center
-Credits.Parent = Frame
+AddButton("العربية", ArabicURL)
+AddButton("English", EnglishURL)
