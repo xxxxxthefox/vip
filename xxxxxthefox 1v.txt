@@ -3,7 +3,6 @@ getgenv().settings = {
     enable_aimbot = true,
     enable_prediction = true,
     enable_protection = true,
-    enable_autoattack = false,
     teamCheck = true,
     wallCheck = true,
     predictionFactor = 0.1,
@@ -54,7 +53,6 @@ local toggleSettings = {
     { "✅ تفعيل الأيمبوت", "enable_aimbot" },
     { "🎯 التنبؤ بالهدف", "enable_prediction" },
     { "🛡️ الحماية من الكشف", "enable_protection" },
-    { "🤖 الضرب التلقائي", "enable_autoattack" },
     { "👥 التحقق من الفريق", "teamCheck" },
     { "🧱 التحقق من الحائط", "wallCheck" },
     { "🌀 عرض دائرة FOV", "drawFov" }
