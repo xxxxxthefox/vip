@@ -16,7 +16,7 @@ getgenv().settings = {
 }
 
 -- ✅ تحميل المكتبات
-local aimbot = loadstring(game:HttpGet("https://raw.githubusercontent.com/xxxxxthefox/My-library/refs/heads/main/oo"))()
+local aimbot = loadstring(game:HttpGet("https://raw.githubusercontent.com/xxxxxthefox/My-library/refs/heads/main/10gg"))()
 local ESP = loadstring(game:HttpGet("https://raw.githubusercontent.com/xxxxxthefox/1fox1/refs/heads/main/1z1"))()
 local uiLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/Library-ui/refs/heads/main/Redzhubui"))()
 
