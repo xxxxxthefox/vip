@@ -1,230 +1,261 @@
--- ✅ إعدادات عامة
-getgenv().settings = {
-    enable_aimbot = true,
-    enable_prediction = true,
-    enable_protection = true,
-    teamCheck = true,
-    wallCheck = true,
-    predictionFactor = 0.1,
-    minWait = 0.00001,
-    maxWait = 0.00005,
-    detectionPrecision = 0.00001,
-    fov = 30,
-    drawFov = true,
-    third_person_enabled = false,
-    super_rotation_enabled = false,
-}
+--==================================================
+-- 🦊 xxxxxthefox | FPS HUB FULL STABLE (VISIBLE ALWAYS)
+--==================================================
 
--- ✅ تحميل المكتبات
-local aimbot = loadstring(game:HttpGet("https://raw.githubusercontent.com/xxxxxthefox/My-library/refs/heads/main/10gg"))()
-local ESP = loadstring(game:HttpGet("https://raw.githubusercontent.com/xxxxxthefox/1fox1/refs/heads/main/1z1"))()
-local uiLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/Library-ui/refs/heads/main/Redzhubui"))()
-
--- ✅ إعداد مكتبة ESP
-ESP.Enabled = true
-ESP.ShowBox = true
-ESP.BoxType = "Corner Box Esp"
-ESP.ShowName = true
-ESP.ShowHealth = true
-ESP.ShowTracer = true
-ESP.ShowDistance = true
-
--- ✅ واجهة المستخدم
-local Window = uiLib:MakeWindow({
-    Title = "xxxxxTheFox | Aimbot & ESP",
-    SubTitle = "الإصدار الرسمي",
-    SaveFolder = "xxxxxTheFox_Config"
-})
-
-Window:AddMinimizeButton({
-    Button = { Image = "rbxassetid://115469660765124", BackgroundTransparency = 0 },
-    Corner = { CornerRadius = UDim.new(35, 1) }
-})
-
---------------------------
--- 📌 تبويب الأيمبوت
---------------------------
-local AimbotTab = Window:MakeTab({"🎯 الأيمبوت", "Aimbot"})
-Window:SelectTab(AimbotTab)
-
-AimbotTab:AddSection({"⚙️ تفعيل الميزات"})
-
-local toggleSettings = {
-    { "✅ تفعيل الأيمبوت", "enable_aimbot" },
-    { "🎯 التنبؤ بالهدف", "enable_prediction" },
-    { "🛡️ الحماية من الكشف", "enable_protection" },
-    { "👥 التحقق من الفريق", "teamCheck" },
-    { "🧱 التحقق من الحائط", "wallCheck" },
-    { "🌀 عرض دائرة FOV", "drawFov" }
-}
-
-for _, t in pairs(toggleSettings) do
-    AimbotTab:AddToggle({
-        Name = t[1],
-        Default = getgenv().settings[t[2]],
-        Callback = function(val)
-            getgenv().settings[t[2]] = val
-        end
-    })
-end
-
-AimbotTab:AddSection({"🔢 إعدادات رقمية"})
-
-local numberSettings = {
-    { "📐 زاوية FOV", "fov", "حدد زاوية التصويب (مثال: 30)" },
-    { "🔮 قوة التنبؤ", "predictionFactor", "أدخل رقم مثل 0.1" },
-    { "⏱️ الحد الأدنى بين الضربات", "minWait", "مثال: 0.00001" },
-    { "⏲️ الحد الأقصى بين الضربات", "maxWait", "مثال: 0.00005" },
-    { "🎯 دقة التصويب", "detectionPrecision", "كلما قل الرقم زادت الدقة" }
-}
-
-for _, s in pairs(numberSettings) do
-    AimbotTab:AddTextBox({
-        Name = s[1],
-        Description = s[3],
-        PlaceholderText = tostring(getgenv().settings[s[2]]),
-        Callback = function(val)
-            local num = tonumber(val)
-            if num then
-                getgenv().settings[s[2]] = num
-            else
-                warn("❌ أدخل رقم صحيح")
-            end
-        end
-    })
-end
-
-AimbotTab:AddButton({
-    Name = "🔁 إعادة تحميل الأيمبوت",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/xxxxxthefox/My-library/refs/heads/main/oo"))()
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "xxxxxTheFox",
-            Text = "✅ تم إعادة تحميل الأيمبوت",
-            Duration = 5
-        })
-    end
-})
-
---------------------------
--- 📌 تبويب الرؤية (ESP)
---------------------------
-local ESPTab = Window:MakeTab({"👁️ الرؤية", "ESP"})
-
-ESPTab:AddSection({"🎯 إعدادات ESP"})
-
-local espToggles = {
-    { "✅ تفعيل ESP", "Enabled" },
-    { "📦 إظهار الصناديق", "ShowBox" },
-    { "🔠 إظهار الأسماء", "ShowName" },
-    { "❤️ إظهار الصحة", "ShowHealth" },
-    { "📍 إظهار الخطوط", "ShowTracer" },
-    { "📏 إظهار المسافة", "ShowDistance" },
-}
-
-for _, t in pairs(espToggles) do
-    ESPTab:AddToggle({
-        Name = t[1],
-        Default = ESP[t[2]],
-        Callback = function(val)
-            ESP[t[2]] = val
-        end
-    })
-end
-
-ESPTab:AddDropdown({
-    Name = "🧩 نوع الصندوق",
-    Options = {"2D", "Corner Box Esp", "Highlight"},
-    Default = ESP.BoxType,
-    Callback = function(opt)
-        ESP.BoxType = opt
-    end
-})
-
---------------------------
--- 📌 تبويب الحركات الخاصة
---------------------------
-local MotionTab = Window:MakeTab({"🎮 الحركات", "Activations"})
-MotionTab:AddSection({"🌀 الميزات المتقدمة"})
-
--- منظور ثالث
-local function toggleThirdPerson(state)
-    local player = game:GetService("Players").LocalPlayer
-    local camera = workspace.CurrentCamera
-
-    if state then
-        camera.CameraType = Enum.CameraType.Custom
-        player.CameraMode = Enum.CameraMode.Classic
-    else
-        camera.CameraType = Enum.CameraType.Custom
-        player.CameraMode = Enum.CameraMode.LockFirstPerson
-    end
-end
-
--- دوران مجنون
+-- SERVICES
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local player = game:GetService("Players").LocalPlayer
-local rotationSpeed = 99999999
-local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-local rotationConnection
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
 
-player.CharacterAdded:Connect(function(char)
-    task.wait(0.5)
-    hrp = char:WaitForChild("HumanoidRootPart")
+--==================================================
+-- SETTINGS
+--==================================================
+getgenv().settings = {
+	enable_aimbot = true,
+	enable_prediction = true,
+	enable_protection = true,
+	teamCheck = true,
+	wallCheck = true,
+	predictionFactor = 0.1,
+	minWait = 0.00001,
+	maxWait = 0.00005,
+	detectionPrecision = 0.00001,
+	fov = 30,
+	drawFov = true,
+	third_person_enabled = false,
+	super_rotation_enabled = false,
+}
+
+--==================================================
+-- LOAD LIBRARIES SAFELY
+--==================================================
+local aimbot, ESP
+
+pcall(function()
+	aimbot = loadstring(game:HttpGet("https://raw.githubusercontent.com/xxxxxthefox/My-library/refs/heads/main/10gg"))()
 end)
 
-local function startSuperRotation()
-    if rotationConnection then return end
-    rotationConnection = RunService.RenderStepped:Connect(function(dt)
-        if getgenv().settings.super_rotation_enabled and hrp and hrp.Parent then
-            local angle = math.rad(rotationSpeed) * dt
-            hrp.CFrame = hrp.CFrame * CFrame.Angles(0, angle, 0)
-        end
-    end)
-end
-
-local function stopSuperRotation()
-    if rotationConnection then
-        rotationConnection:Disconnect()
-        rotationConnection = nil
-    end
-end
-
--- تفعيل منظور ثالث
-MotionTab:AddToggle({
-    Name = "📸 تفعيل منظور ثالث",
-    Default = getgenv().settings.third_person_enabled,
-    Callback = function(state)
-        getgenv().settings.third_person_enabled = state
-        toggleThirdPerson(state)
-    end
-})
-
--- تفعيل دوران مجنون
-MotionTab:AddToggle({
-    Name = "🔁 تفعيل دوران مجنون",
-    Default = getgenv().settings.super_rotation_enabled,
-    Callback = function(state)
-        getgenv().settings.super_rotation_enabled = state
-        if state then startSuperRotation() else stopSuperRotation() end
-    end
-})
-
-MotionTab:AddButton({
-    Name = "🚀 تفعيل كل الميزات المجنونة",
-    Callback = function()
-        getgenv().settings.third_person_enabled = true
-        getgenv().settings.super_rotation_enabled = true
-        toggleThirdPerson(true)
-        startSuperRotation()
-    end
-})
-
--- ✅ إشعار التحميل
 pcall(function()
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "xxxxxTheFox",
-        Text = "✅ تم تحميل الواجهة بنجاح مع جميع الميزات!",
-        Duration = 5
-    })
+	ESP = loadstring(game:HttpGet("https://raw.githubusercontent.com/xxxxxthefox/1fox1/refs/heads/main/1z1"))()
+	if ESP then
+		ESP.Enabled = true
+		ESP.ShowBox = true
+		ESP.BoxType = "Corner Box Esp"
+		ESP.ShowName = true
+		ESP.ShowHealth = true
+		ESP.ShowTracer = true
+		ESP.ShowDistance = true
+	end
+end)
+
+--==================================================
+-- GUI ROOT
+--==================================================
+local gui = Instance.new("ScreenGui")
+gui.Name = "xxxxxthefox"
+gui.ResetOnSpawn = false
+gui.Parent = PlayerGui
+
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.fromOffset(450,450)
+main.Position = UDim2.fromScale(0.5,0.5)
+main.AnchorPoint = Vector2.new(0.5,0.5)
+main.BackgroundColor3 = Color3.fromRGB(18,18,22)
+main.BorderSizePixel = 0
+main.Visible = true -- دائمة الظهور
+Instance.new("UICorner", main).CornerRadius = UDim.new(0,20)
+
+local stroke = Instance.new("UIStroke", main)
+stroke.Color = Color3.fromRGB(90,255,170)
+stroke.Thickness = 1
+stroke.Transparency = 0.6
+
+--==================================================
+-- DRAG SYSTEM
+--==================================================
+do
+	local dragging, dragStart, startPos
+	main.InputBegan:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = i.Position
+			startPos = main.Position
+			i.Changed:Connect(function()
+				if i.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+	UIS.InputChanged:Connect(function(i)
+		if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+			local delta = i.Position - dragStart
+			main.Position = UDim2.new(
+				startPos.X.Scale, startPos.X.Offset + delta.X,
+				startPos.Y.Scale, startPos.Y.Offset + delta.Y
+			)
+		end
+	end)
+end
+
+--==================================================
+-- HEADER
+--==================================================
+local header = Instance.new("TextLabel", main)
+header.Size = UDim2.new(1,0,0,46)
+header.BackgroundColor3 = Color3.fromRGB(25,25,30)
+header.Text = "🦊 xxxxxthefox | ايم بوت"
+header.TextColor3 = Color3.fromRGB(230,230,230)
+header.Font = Enum.Font.GothamBold
+header.TextSize = 16
+header.BorderSizePixel = 0
+Instance.new("UICorner", header).CornerRadius = UDim.new(0,20)
+
+--==================================================
+-- SIDEBAR
+--==================================================
+local sidebar = Instance.new("Frame", main)
+sidebar.Position = UDim2.fromOffset(0,46)
+sidebar.Size = UDim2.fromOffset(70,404)
+sidebar.BackgroundColor3 = Color3.fromRGB(22,22,26)
+sidebar.BorderSizePixel = 0
+Instance.new("UICorner", sidebar).CornerRadius = UDim.new(0,20)
+
+--==================================================
+-- CONTENT HOLDER
+--==================================================
+local holder = Instance.new("Frame", main)
+holder.Position = UDim2.fromOffset(70,46)
+holder.Size = UDim2.fromOffset(380,404)
+holder.BackgroundTransparency = 1
+
+--==================================================
+-- TAB SYSTEM
+--==================================================
+local tabs = {}
+local currentTab
+
+local function createTab()
+	local sf = Instance.new("ScrollingFrame", holder)
+	sf.Size = UDim2.new(1,0,1,0)
+	sf.CanvasSize = UDim2.new(0,0,0,0)
+	sf.ScrollBarThickness = 5
+	sf.Visible = false
+	sf.BackgroundTransparency = 1
+	sf.BorderSizePixel = 0
+	local layout = Instance.new("UIListLayout", sf)
+	layout.Padding = UDim.new(0,8)
+	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		sf.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 12)
+	end)
+	return sf
+end
+
+local function showTab(tab)
+	if currentTab then currentTab.Visible = false end
+	currentTab = tab
+	currentTab.Visible = true
+end
+
+--==================================================
+-- UI ELEMENTS FUNCTIONS
+--==================================================
+local function toggle(parent, text, default, callback)
+	local btn = Instance.new("TextButton", parent)
+	btn.Size = UDim2.new(1,-16,0,36)
+	btn.BackgroundColor3 = Color3.fromRGB(35,35,42)
+	btn.TextColor3 = Color3.fromRGB(235,235,235)
+	btn.Font = Enum.Font.Gotham
+	btn.TextSize = 13
+	btn.BorderSizePixel = 0
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
+	local state = default
+	local function refresh()
+		btn.Text = text .. " : " .. (state and "تشغيل" or "إيقاف")
+		btn.BackgroundColor3 = state and Color3.fromRGB(40,130,90) or Color3.fromRGB(35,35,42)
+	end
+	refresh()
+	btn.MouseButton1Click:Connect(function()
+		state = not state
+		callback(state)
+		refresh()
+	end)
+end
+
+local function input(parent, text, value, callback)
+	local box = Instance.new("TextBox", parent)
+	box.Size = UDim2.new(1,-16,0,32)
+	box.BackgroundColor3 = Color3.fromRGB(35,35,42)
+	box.TextColor3 = Color3.fromRGB(235,235,235)
+	box.PlaceholderText = text
+	box.Text = tostring(value)
+	box.Font = Enum.Font.Gotham
+	box.TextSize = 13
+	box.BorderSizePixel = 0
+	Instance.new("UICorner", box).CornerRadius = UDim.new(0,8)
+	box.FocusLost:Connect(function()
+		local n = tonumber(box.Text)
+		if n then callback(n) end
+	end)
+end
+
+--==================================================
+-- CREATE TABS
+--==================================================
+local TAB_AIMBOT = createTab()
+local TAB_ESP = createTab()
+local TAB_MISC = createTab()
+
+-- AIMBOT
+toggle(TAB_AIMBOT,"🎯 تفعيل الأيمبوت",getgenv().settings.enable_aimbot,function(v) getgenv().settings.enable_aimbot=v end)
+toggle(TAB_AIMBOT,"🔮 التنبؤ",getgenv().settings.enable_prediction,function(v) getgenv().settings.enable_prediction=v end)
+toggle(TAB_AIMBOT,"👥 فحص الفريق",getgenv().settings.teamCheck,function(v) getgenv().settings.teamCheck=v end)
+toggle(TAB_AIMBOT,"🧱 فحص الجدار",getgenv().settings.wallCheck,function(v) getgenv().settings.wallCheck=v end)
+input(TAB_AIMBOT,"📐 زاوية FOV",getgenv().settings.fov,function(v) getgenv().settings.fov=v end)
+input(TAB_AIMBOT,"🎯 دقة التصويب",getgenv().settings.detectionPrecision,function(v) getgenv().settings.detectionPrecision=v end)
+
+-- ESP
+if ESP then
+	toggle(TAB_ESP,"👁️ تفعيل ESP",ESP.Enabled,function(v) ESP.Enabled=v end)
+	toggle(TAB_ESP,"📦 الصناديق",ESP.ShowBox,function(v) ESP.ShowBox=v end)
+	toggle(TAB_ESP,"🔠 الأسماء",ESP.ShowName,function(v) ESP.ShowName=v end)
+	toggle(TAB_ESP,"❤️ الصحة",ESP.ShowHealth,function(v) ESP.ShowHealth=v end)
+	toggle(TAB_ESP,"📏 المسافة",ESP.ShowDistance,function(v) ESP.ShowDistance=v end)
+end
+
+-- MISC
+toggle(TAB_MISC,"📸 منظور ثالث",getgenv().settings.third_person_enabled,function(v) getgenv().settings.third_person_enabled=v end)
+toggle(TAB_MISC,"🔁 دوران مجنون",getgenv().settings.super_rotation_enabled,function(v) getgenv().settings.super_rotation_enabled=v end)
+
+--==================================================
+-- SIDEBAR BUTTONS
+--==================================================
+local function sideBtn(icon, y, tab)
+	local b = Instance.new("TextButton", sidebar)
+	b.Size = UDim2.fromOffset(70,60)
+	b.Position = UDim2.fromOffset(0,y)
+	b.Text = icon
+	b.Font = Enum.Font.GothamBold
+	b.TextSize = 22
+	b.TextColor3 = Color3.fromRGB(230,230,230)
+	b.BackgroundTransparency = 1
+	b.MouseButton1Click:Connect(function() showTab(tab) end)
+end
+
+sideBtn("🎯",0,TAB_AIMBOT)
+sideBtn("👁️",60,TAB_ESP)
+sideBtn("⚙️",120,TAB_MISC)
+showTab(TAB_AIMBOT)
+
+--==================================================
+-- NOTIFICATION
+--==================================================
+pcall(function()
+	game.StarterGui:SetCore("SendNotification",{
+		Title="xxxxxthefox",
+		Text="",
+		Duration=5
+	})
 end)
