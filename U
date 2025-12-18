@@ -1,0 +1,170 @@
+---------------------------------------------------------------------
+-- SERVICES
+---------------------------------------------------------------------
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local VirtualUser = game:GetService("VirtualUser")
+
+---------------------------------------------------------------------
+-- VARS
+---------------------------------------------------------------------
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+local FOVring
+local lockedPart = nil
+
+---------------------------------------------------------------------
+-- PROTECTION (اختياري)
+---------------------------------------------------------------------
+pcall(function()
+    if getgenv().settings and getgenv().settings.enable_protection then
+        hookfunction(math.random, function() return 1 end)
+    end
+end)
+
+---------------------------------------------------------------------
+-- HELPERS (من سكربتك)
+---------------------------------------------------------------------
+local function getSettings()
+    return getgenv().settings
+end
+
+local function isAlive(plr)
+    local c = plr.Character
+    local h = c and c:FindFirstChildOfClass("Humanoid")
+    return h and h.Health > 0
+end
+
+local function isEnemy(plr)
+    local s = getSettings()
+    if not s then return false end
+    return not s.teamCheck or plr.Team ~= LocalPlayer.Team
+end
+
+local function isVisible(part)
+    local s = getSettings()
+    if not s or not s.wallCheck then return true end
+
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Blacklist
+    params.FilterDescendantsInstances = {
+        LocalPlayer.Character,
+        part.Parent,
+        Camera
+    }
+
+    local origin = Camera.CFrame.Position
+    local dir = part.Position - origin
+    return Workspace:Raycast(origin, dir, params) == nil
+end
+
+local function predict(part)
+    local s = getSettings()
+    if s and s.enable_prediction then
+        return part.Position +
+            (part.AssemblyLinearVelocity or Vector3.zero)
+            * (s.predictionFactor or 0.2)
+    end
+    return part.Position
+end
+
+local function fire()
+    VirtualUser:Button1Down(Vector2.zero, Camera.CFrame)
+    task.wait()
+    VirtualUser:Button1Up(Vector2.zero, Camera.CFrame)
+end
+
+---------------------------------------------------------------------
+-- TARGET ACQUIRE (ثابت)
+---------------------------------------------------------------------
+local function acquireTarget()
+    local s = getSettings()
+    if not s then return nil end
+
+    local best, bestDist = nil, math.huge
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer and isEnemy(plr) and isAlive(plr) then
+            local char = plr.Character
+            local part = char and char:FindFirstChild(s.aimbot_target_part or "Head")
+            if part and isVisible(part) then
+                local d = (part.Position - Camera.CFrame.Position).Magnitude
+                if d < bestDist then
+                    bestDist = d
+                    best = part
+                end
+            end
+        end
+    end
+    return best
+end
+
+---------------------------------------------------------------------
+-- FOV (اختياري)
+---------------------------------------------------------------------
+local function updateFov()
+    local s = getSettings()
+    if not s or not s.drawFov then return end
+
+    if not FOVring then
+        FOVring = Drawing.new("Circle")
+        FOVring.Filled = false
+        FOVring.Thickness = 2
+        FOVring.Color = Color3.fromRGB(0,255,0)
+    end
+
+    FOVring.Position = Camera.ViewportSize * 0.5
+    FOVring.Radius = s.fov or 100
+    FOVring.Visible = true
+end
+
+---------------------------------------------------------------------
+-- ☠️ AIMLOCK أقصى حد (Override مطلق)
+---------------------------------------------------------------------
+RunService.RenderStepped:Connect(function()
+    local s = getSettings()
+    if not s or not s.enable_aimbot then
+        lockedPart = nil
+        if FOVring then FOVring.Visible = false end
+        return
+    end
+
+    updateFov()
+
+    -- تثبيت الهدف
+    if not lockedPart or not lockedPart.Parent then
+        lockedPart = acquireTarget()
+    end
+    if not lockedPart then return end
+
+    local camPos = Camera.CFrame.Position
+    local targetPos = predict(lockedPart)
+    local dir = (targetPos - camPos).Unit
+
+    -- 💀 أقصى LookAt ممكن
+    Camera.CFrame = CFrame.new(
+        camPos,
+        camPos + dir * 1e8
+    )
+end)
+
+---------------------------------------------------------------------
+-- 🔁 إعادة قسرية (حتى لو سكربت ثاني تدخل)
+---------------------------------------------------------------------
+RunService.Heartbeat:Connect(function()
+    if lockedPart then
+        local camPos = Camera.CFrame.Position
+        local dir = (lockedPart.Position - camPos).Unit
+        Camera.CFrame = CFrame.new(camPos, camPos + dir * 1e8)
+    end
+end)
+
+---------------------------------------------------------------------
+-- 🔫 Auto Fire
+---------------------------------------------------------------------
+RunService.Stepped:Connect(function()
+    local s = getSettings()
+    if s and s.enable_autoattack and lockedPart then
+        fire()
+    end
+end)
