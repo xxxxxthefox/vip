@@ -1,0 +1,105 @@
+--[[
+	PURE GLOBAL API CHAT
+	OWNER: xxxxxthefox
+	SERVER: https://p1-xvll.onrender.com
+]]
+
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
+local LocalPlayer = Players.LocalPlayer
+
+local SERVER_URL = "https://p1-xvll.onrender.com"
+local ROOM = "roblox://"..game.PlaceId.."/"..game.JobId
+
+pcall(function()
+	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
+end)
+
+-- GUI
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.Name = "PureGlobalChat"
+
+local Main = Instance.new("Frame", ScreenGui)
+Main.Size = UDim2.new(0, 300, 0, 200)
+Main.Position = UDim2.new(0.03, 0, 0.15, 0)
+Main.BackgroundColor3 = Color3.fromRGB(35,45,60)
+Main.Active = true
+Main.Draggable = true
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0,12)
+
+local Scroll = Instance.new("ScrollingFrame", Main)
+Scroll.Size = UDim2.new(1, -10, 1, -60)
+Scroll.Position = UDim2.new(0,5,0,5)
+Scroll.CanvasSize = UDim2.new(0,0,5,0)
+Scroll.ScrollBarThickness = 2
+local UIList = Instance.new("UIListLayout", Scroll)
+
+local Input = Instance.new("TextBox", Main)
+Input.Size = UDim2.new(1, -10, 0, 40)
+Input.Position = UDim2.new(0,5,1,-45)
+Input.PlaceholderText = "اكتب رسالتك..."
+Input.BackgroundColor3 = Color3.fromRGB(20,25,35)
+Input.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", Input).CornerRadius = UDim.new(0,12)
+
+local function AddText(user, msg)
+	local label = Instance.new("TextLabel", Scroll)
+	label.Size = UDim2.new(1, -5, 0, 0)
+	label.AutomaticSize = Enum.AutomaticSize.Y
+	label.BackgroundTransparency = 1
+	label.TextWrapped = true
+	label.Font = Enum.Font.GothamBold
+	label.TextSize = 14
+	label.TextColor3 = Color3.new(1,1,1)
+
+	if user == "xxxxxthefox" then
+		label.Text = "👑 "..user..": "..msg
+		label.TextColor3 = Color3.fromRGB(255,215,0)
+	else
+		label.Text = user..": "..msg
+	end
+
+	task.defer(function()
+		Scroll.CanvasPosition = Vector2.new(0, Scroll.AbsoluteCanvasSize.Y)
+	end)
+end
+
+-- إرسال للسيرفر
+local function SendMessage(text)
+	local data = {
+		username = LocalPlayer.Name,
+		room = ROOM,
+		message = text
+	}
+	HttpService:PostAsync(SERVER_URL.."/send", HttpService:JSONEncode(data))
+end
+
+-- جلب الرسائل كل ثانية
+task.spawn(function()
+	while true do
+		task.wait(1.5)
+		local success, result = pcall(function()
+			return HttpService:GetAsync(SERVER_URL.."/recv?room="..HttpService:UrlEncode(ROOM))
+		end)
+		if success then
+			local decoded = HttpService:JSONDecode(result)
+			Scroll:ClearAllChildren()
+			UIList.Parent = Scroll
+			for _, m in ipairs(decoded.messages) do
+				AddText(m.username, m.message)
+			end
+		end
+	end
+end)
+
+Input.FocusLost:Connect(function(enter)
+	if enter and Input.Text ~= "" then
+		SendMessage(Input.Text)
+		Input.Text = ""
+	end
+end)
+
+AddText("System", "🌐 Global Server Chat Connected")
+AddText("System", "Room: "..ROOM)
