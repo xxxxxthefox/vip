@@ -1,0 +1,172 @@
+--[[
+    SILENT V2: THE SINGULARITY (INSANE MODE)
+    الوضعية: مختل عقلياً - دمار شامل - تفكيك جذري
+    هذا السكربت يمثل القوة القصوى للهندسة العكسية.
+]]
+
+local player = game:GetService("Players").LocalPlayer
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local all_objects = {}
+
+--// وظيفة الكتابة العميقة على القرص
+local function forceWrite(name, content)
+    if writefile then
+        local path = "MADNESS_" .. name .. ".txt"
+        pcall(function() writefile(path, content) end)
+        return path
+    end
+    return "Not Supported"
+end
+
+--// إنشاء واجهة "الفراغ" (The Void UI)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "SINGULARITY_VOID"
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
+
+local Main = Instance.new("Frame")
+Main.Size = UDim2.new(0, 650, 0, 750)
+Main.Position = UDim2.new(0.5, -325, 0.5, -375)
+Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Main.BorderSizePixel = 0
+Main.Parent = ScreenGui
+
+local NeonStroke = Instance.new("UIStroke")
+NeonStroke.Thickness = 4
+NeonStroke.Color = Color3.fromRGB(255, 0, 255) -- بنفسجي مجنون
+NeonStroke.Parent = Main
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 80)
+Title.Text = "☣️ SINGULARITY: INSANE MODE"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 30
+Title.Font = Enum.Font.SpecialElite
+Title.BackgroundTransparency = 1
+Title.Parent = Main
+
+--// شبكة التحكم الانتحارية
+local Grid = Instance.new("Frame")
+Grid.Size = UDim2.new(1, -30, 0, 220)
+Grid.Position = UDim2.new(0, 15, 0, 90)
+Grid.BackgroundTransparency = 1
+Grid.Parent = Main
+
+local UIGrid = Instance.new("UIGridLayout")
+UIGrid.CellSize = UDim2.new(0.48, 0, 0, 50)
+UIGrid.CellPadding = UDim2.new(0.04, 0, 0.05, 0)
+UIGrid.Parent = Grid
+
+local function createInsaneBtn(text, color)
+    local b = Instance.new("TextButton")
+    b.Text = text
+    b.BackgroundColor3 = color
+    b.TextColor3 = Color3.white
+    b.Font = Enum.Font.Code
+    b.TextSize = 14
+    b.BorderSizePixel = 0
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 2) -- زوايا حادة
+    b.Parent = Grid
+    return b
+end
+
+local ScanEverything = createInsaneBtn("🧬 استخراج الحمض النووي للعبة", Color3.fromRGB(50, 0, 100))
+local DeepDump = createInsaneBtn("💾 حفظ الأرشيف الجنوني (.txt)", Color3.fromRGB(200, 0, 100))
+local NilBreaker = createInsaneBtn("👻 كسر حماية الـ Nil", Color3.fromRGB(100, 0, 0))
+local Hysteria = createInsaneBtn("💀 وضع الهستيريا (Total Spam)", Color3.fromRGB(255, 0, 0))
+local CopyAdvanced = createInsaneBtn("📜 نسخ الأوامر كمصفوفة", Color3.fromRGB(30, 30, 30))
+local Status = createInsaneBtn("الحالة: جاهز للإبادة", Color3.fromRGB(15, 15, 15))
+
+--// قائمة العرض (The Scroll of Madness)
+local Scroll = Instance.new("ScrollingFrame")
+Scroll.Size = UDim2.new(1, -30, 1, -350)
+Scroll.Position = UDim2.new(0, 15, 0, 330)
+Scroll.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+Scroll.BorderSizePixel = 0
+Scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+Scroll.ScrollBarThickness = 4
+Scroll.Parent = Main
+Instance.new("UIListLayout", Scroll)
+
+--// محرك الاختلال العقلي (The Madness Engine)
+local function atomize(obj)
+    if not (obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction")) then return end
+    if all_objects[obj] then return end
+    
+    all_objects[obj] = {
+        FullName = obj:GetFullName(),
+        Type = obj.ClassName,
+        Parent = tostring(obj.Parent),
+        Time = os.clock()
+    }
+
+    local row = Instance.new("Frame")
+    row.Size = UDim2.new(1, 0, 0, 40)
+    row.BackgroundColor3 = Color3.fromRGB(10, 0, 10)
+    row.Parent = Scroll
+    
+    local txt = Instance.new("TextLabel")
+    txt.Size = UDim2.new(1, -10, 1, 0)
+    txt.Position = UDim2.new(0, 10, 0, 0)
+    txt.Text = ">> [DETECTED] " .. obj.Name .. " | " .. obj.ClassName
+    txt.TextColor3 = Color3.fromRGB(255, 0, 255)
+    txt.BackgroundTransparency = 1
+    txt.TextXAlignment = Enum.TextXAlignment.Left
+    txt.Font = Enum.Font.Code
+    txt.TextSize = 11
+    txt.Parent = row
+    
+    Scroll.CanvasSize = UDim2.new(0, 0, 0, Scroll.UIListLayout.AbsoluteContentSize.Y)
+end
+
+ScanEverything.MouseButton1Click:Connect(function()
+    Status.Text = "⏳ جاري التفكيك الذري..."
+    for _, v in pairs(game:GetDescendants()) do pcall(function() atomize(v) end) end
+    Status.Text = "✅ تم استخراج " .. #Scroll:GetChildren()-1 .. " كائن"
+end)
+
+NilBreaker.MouseButton1Click:Connect(function()
+    Status.Text = "⏳ اختراق الـ Nil..."
+    if getnilinstances then
+        for _, v in pairs(getnilinstances()) do pcall(function() atomize(v) end) end
+        Status.Text = "✅ تم سحق الـ Nil!"
+    end
+end)
+
+DeepDump.MouseButton1Click:Connect(function()
+    Status.Text = "⏳ جاري الكتابة القسرية..."
+    local dump = "-- [[ SINGULARITY TOTAL DUMP ]] --\n\n"
+    for obj, data in pairs(all_objects) do
+        dump = dump .. "[+] OBJECT: " .. tostring(obj) .. "\n"
+        dump = dump .. "    PATH: game." .. data.FullName .. "\n"
+        dump = dump .. "    TYPE: " .. data.Type .. "\n"
+        dump = dump .. "    CODE: game." .. data.FullName .. (data.Type == "RemoteEvent" and ":FireServer()" or ":InvokeServer()") .. "\n"
+        dump = dump .. "------------------------------------------\n"
+    end
+    local path = forceWrite("TOTAL_ANNIHILATION", dump)
+    Status.Text = "💾 تم الحفظ في: " .. path
+end)
+
+Hysteria.MouseButton1Click:Connect(function()
+    Status.Text = "💀 هستيريا نشطة..."
+    for i=1, 200 do
+        for obj, _ in pairs(all_objects) do
+            pcall(function()
+                if obj:IsA("RemoteEvent") then 
+                    obj:FireServer(math.random(-9e9, 9e9), "SINGULARITY", {["MAD"] = true})
+                end 
+            end)
+        end
+        task.wait()
+    end
+    Status.Text = "✅ انتهت النوبة"
+end)
+
+--// نظام السحب (Drag)
+local d = {a = false}
+Main.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d.a = true d.s = i.Position d.p = Main.Position end end)
+UIS.InputChanged:Connect(function(i) if d.a and i.UserInputType == Enum.UserInputType.MouseMovement then local delta = i.Position - d.s Main.Position = UDim2.new(d.p.X.Scale, d.p.X.Offset + delta.X, d.p.Y.Scale, d.p.Y.Offset + delta.Y) end end)
+UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d.a = false end end)
+
+print("THE SINGULARITY HAS AWAKENED")
